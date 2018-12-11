@@ -47,7 +47,6 @@
   <ItemGroup>
     <Compile Include="Estatistica.cs" />
     <Compile Include="GeradorEstatisticas.cs" />
-    <Compile Include="GeradorPlanilhas.cs" />
     <Compile Include="IntervaloConfianca.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="VariavelAleatoria.cs" />

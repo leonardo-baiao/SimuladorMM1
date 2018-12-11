@@ -101,6 +101,16 @@ namespace Estatisticas
             return soma/(n-1);
         }
 
+        //Calcula a estimativa da variancia
+        public double CalculaEstimativaVariancia(double somaQ, double soma, int nRodadas)
+        {
+            double varianciaEstimada;
+
+            varianciaEstimada = somaQ / (nRodadas - 1) - Math.Pow(soma, 2) / (nRodadas * (nRodadas - 1));
+
+            return varianciaEstimada;
+        }
+
         //Calcula a covariancia iterando a partir de uma lista de médias de rodada e da média amostral geral.
         public double CalculaCovariancia(IEnumerable<double> mediasRodadas, double mediaAmostral)
         {

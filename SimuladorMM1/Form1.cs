@@ -72,7 +72,7 @@ namespace SimuladorMM1
                 {
                     this.Invoke((MethodInvoker)delegate
                     {
-                        label2.Text = "Calculando rodada: " + rodadas + "  Tempo comeco: " + data_hora_comeco.ToLongTimeString();
+                        label2.Text = "Calculando rodada: " + rodadas + "  Tempo de começo: " + data_hora_comeco.ToLongTimeString();
                     });
                     rodadas = _simulacao.listaEstatisticas.Count;
                 }
@@ -80,33 +80,28 @@ namespace SimuladorMM1
                 {
                     List<double> list = new List<double>(_simulacao.listaEstatisticas.Select(l => l.QuantidadeMedia));
                     chart1.Series["N° Pessoas"].Points.DataBindY(list);
+                    chart1.Series["Variância"].Points.DataBindY(_simulacao.listaVarianciaP);
+
+                    List<double> list1 = new List<double>(_simulacao.listaEstatisticas.Select(l => l.TempoMedio));
+                    chart2.Series["Tempo Médio"].Points.DataBindY(list1);
+                    chart2.Series["Variância"].Points.DataBindY(_simulacao.listaVarianciaT);
                 });
                 data_hora_fim = DateTime.Now;
                 this.Invoke((MethodInvoker)delegate
                 {
-                    label2.Text = "Fim da simulação" + "  Tempo comeco: " + data_hora_comeco.ToLongTimeString() + "  Tempo final: " + data_hora_fim.ToLongTimeString() + "\n\n"
-                                + "Tempo Médio Final: ";
+                    label2.Text = "Fim da simulação" + "  Tempo de começo: " + data_hora_comeco.ToLongTimeString() + "  Tempo final: " + data_hora_fim.ToLongTimeString();
+
+                    label4.Text = "E: " + _simulacao.mediaPessoasFinal + "  V: " + _simulacao.varianciaPessoasFinal + "\n"
+                                + "L(E): " + _simulacao.icPessoasMedia.L + "  U(E): " + _simulacao.icPessoasMedia.U + "  P(E): " + _simulacao.icPessoasMedia.Precisao + "\n"
+                                + "L(V): " + _simulacao.icPessoasVariancia.L + "  U(V):  " + _simulacao.icPessoasVariancia.U + "  P(V): " + _simulacao.icPessoasVariancia.Precisao;
+
+                    label5.Text = "E: " + _simulacao.tempoMedioFinal + "  V: " + _simulacao.varianciaTempoFinal + "\n"
+                                + "L(E): " + _simulacao.icMedia.L + "  U(E): " + _simulacao.icMedia.U + "  P(E): " + _simulacao.icMedia.Precisao + "\n"
+                                + "L(V): " + _simulacao.icVariancia.L + "  U(V):  " + _simulacao.icVariancia.U + "  P(V): " + _simulacao.icVariancia.Precisao;
                 });
-            });
-
-            Task.Factory.StartNew(() =>
-            {
-                while (calculando) ;
-                this.Invoke((MethodInvoker)delegate
-                {
-                    List<double> list = new List<double>(_simulacao.listaEstatisticas.Select(l => l.TempoMedio));
-                    chart2.Series["Tempo Médio"].Points.DataBindY(list);
-                });
-            });           
-
-
+            });          
         }
-
-        private void label1_Click(object sender, EventArgs e)
-        {
-
-        }
-
+        
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
             ComboBox comboBox = (ComboBox)sender;
@@ -123,6 +118,10 @@ namespace SimuladorMM1
             fila = TipoFila.LCFS;
         }
 
+        private void label1_Click(object sender, EventArgs e)
+        {
+
+        }
 
         private void label2_Click(object sender, EventArgs e)
         {
@@ -134,5 +133,14 @@ namespace SimuladorMM1
 
         }
 
+        private void label5_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label6_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }

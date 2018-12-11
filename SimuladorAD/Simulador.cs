@@ -21,6 +21,32 @@ namespace SimuladorAD
         public List<Estatistica> listaEstatisticas;
         private readonly GeradorEstatisticas _geradorEstatisticas;
 
+
+        // variaveis para estimativa da variancia por rodada
+        public List<double> listaVarianciaP;
+        public List<double> listaVarianciaT;
+        double SomTempoAtual = 0;
+        double SomQTempoAtual = 0;
+        double SomPessoasAtual = 0;
+        double SomQPessoasAtual = 0;
+        // fim variaveis
+
+
+        // variaveis para parametros finais
+        public double tempoMedioFinal;
+        public double varianciaTempoFinal;
+        public double somaTempoMedio = 0;
+
+        public double mediaPessoasFinal;
+        public double varianciaPessoasFinal;
+        public double somaQuantidadeMedia = 0;
+
+        public IntervaloConfianca icMedia;
+        public IntervaloConfianca icVariancia;
+        public IntervaloConfianca icPessoasMedia;
+        public IntervaloConfianca icPessoasVariancia;
+        // fim variaveis
+
         public Simulador(TipoFila tipoFila, double taxaChegada)
         {
             GeraFila(tipoFila);
@@ -29,6 +55,10 @@ namespace SimuladorAD
             estatisticaAtual = new Estatistica { Rodada = 0 };
             listaEstatisticas = new List<Estatistica>();
             _geradorEstatisticas = new GeradorEstatisticas();
+
+            
+            listaVarianciaP = new List<double>();
+            listaVarianciaT = new List<double>();
         }
 
         public void IniciarSimulacao()
@@ -125,7 +155,7 @@ namespace SimuladorAD
 
             if (Rodada.Equals(cliente.Tipo))
             {
-                estatisticaAtual.SomaAmostras = tempo - cliente.TempoChegada;
+                estatisticaAtual.SomaAmostras += tempo - cliente.TempoChegada;
                 amostras++;
             }
         }
@@ -177,28 +207,17 @@ namespace SimuladorAD
             estatisticaAtual.QuantidadeMedia = estatisticaAtual.QuantidadeMedia/(tempo - tempoInicialRodada);
             listaEstatisticas.Add(estatisticaAtual);
 
-            //Console.WriteLine("Rodada " + Rodada);
-            //Console.WriteLine("Quantidade: " + fila.Quantidade);
-            //Console.WriteLine("Tempo Medio: " + estatisticaAtual.TempoMedio);
-            //Console.WriteLine("Quantidade Media: " + estatisticaAtual.QuantidadeMedia);
+            SomTempoAtual += estatisticaAtual.TempoMedio;
+            SomQTempoAtual += Math.Pow(estatisticaAtual.TempoMedio, 2);
+            SomPessoasAtual += estatisticaAtual.QuantidadeMedia;
+            SomQPessoasAtual += Math.Pow(estatisticaAtual.QuantidadeMedia, 2);
 
+            listaVarianciaP.Add(_geradorEstatisticas.CalculaEstimativaVariancia(SomQPessoasAtual, SomPessoasAtual, amostras));
+            listaVarianciaT.Add(_geradorEstatisticas.CalculaEstimativaVariancia(SomQTempoAtual, SomTempoAtual, amostras));
         }
 
         public void CalculaEstatisticasFinais()
-        {
-            double tempoMedioFinal;
-            double varianciaTempoFinal;
-            double somaTempoMedio = 0;
-
-            double mediaPessoasFinal;
-            double varianciaPessoasFinal;
-            double somaQuantidadeMedia = 0;
-
-            IntervaloConfianca icMedia;
-            IntervaloConfianca icVariancia;
-            IntervaloConfianca icPessoasMedia;
-            IntervaloConfianca icPessoasVariancia;
-            
+        {            
             foreach (var estatistica in listaEstatisticas)
             {
                 somaTempoMedio += estatistica.TempoMedio;
@@ -220,26 +239,6 @@ namespace SimuladorAD
             double covTempo =_geradorEstatisticas.CalculaCovariancia(listaEstatisticas.Select(l => l.TempoMedio), tempoMedioFinal);
             double covPessoas = _geradorEstatisticas.CalculaCovariancia(listaEstatisticas.Select(l => l.QuantidadeMedia), mediaPessoasFinal);
 
-            Console.WriteLine("--------------------------------------------------------------------");
-            Console.WriteLine("Rodadas: " + listaEstatisticas.Count + " KMIN: " + Constantes.KMIN + " Utilizacao: " + TAXA_CHEGADA);
-            Console.WriteLine("");
-            Console.WriteLine("Tempo Medio: " + tempoMedioFinal);
-            Console.WriteLine("Variancia Tempo: " + varianciaTempoFinal);
-            Console.WriteLine("Intervalo de Confiança Media:");
-            Console.WriteLine("    L: {0}, U: {1}, P: {2}", icMedia.L, icMedia.U, icMedia.Precisao);
-            Console.WriteLine("Intervalo de Confiança Variancia:");
-            Console.WriteLine("    L: {0}, U: {1}, P: {2}", icVariancia.L, icVariancia.U, icVariancia.Precisao);
-            Console.WriteLine("Cov: {0}", covTempo);
-
-            Console.WriteLine("");
-
-            Console.WriteLine("Numero de Pessoas Medio: " + mediaPessoasFinal);
-            Console.WriteLine("Variancia do numero de pessoas: " + varianciaPessoasFinal);
-            Console.WriteLine("Intervalo de Confiança numero de pessoas medio:");
-            Console.WriteLine("    L: {0}, U: {1}, P: {2}", icPessoasMedia.L, icPessoasMedia.U, icPessoasMedia.Precisao);
-            Console.WriteLine("Intervalo de Confiança variancia numero de pessoas:");
-            Console.WriteLine("    L: {0}, U: {1}, P: {2}", icPessoasVariancia.L, icPessoasVariancia.U, icPessoasVariancia.Precisao);
-            Console.WriteLine("Cov: {0}", covPessoas);
         }
 
         private void GeraFila(TipoFila tipoFila)
