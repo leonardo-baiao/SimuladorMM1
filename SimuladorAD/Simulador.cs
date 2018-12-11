@@ -78,11 +78,11 @@ namespace SimuladorAD
 
         private void TrataEvento()
         {
-            eventoAtual = listaEventos.NewProximoEvento();
+            eventoAtual = listaEventos.ProximoEvento();
 
             if (eventoAtual.Tempo == 0)
             {
-                listaEventos.NewAdicionaEvento(CalculaChegadaFregues());
+                listaEventos.AdicionaEvento(CalculaChegadaFregues());
                 return;
             }
 
@@ -114,18 +114,18 @@ namespace SimuladorAD
                 servidor = true;
             }
 
-            listaEventos.NewAdicionaEvento(CalculaChegadaFregues());
+            listaEventos.AdicionaEvento(CalculaChegadaFregues());
 
         }
 
         private void EntradaServidor()
         {
             var cliente = fila.RetornaFregues();
-            listaEventos.NewAdicionaEvento(CalculaSaidaServidor());
+            listaEventos.AdicionaEvento(CalculaSaidaServidor());
 
             if (Rodada.Equals(cliente.Tipo))
             {
-                _geradorEstatisticas.CalculaSomaAmostras(ref estatisticaAtual, tempo - cliente.TempoChegada);
+                estatisticaAtual.SomaAmostras = tempo - cliente.TempoChegada;
                 amostras++;
             }
         }
@@ -173,8 +173,8 @@ namespace SimuladorAD
         
         public void CalculaEstatisticas()
         {
-            estatisticaAtual.TempoMedio = _geradorEstatisticas.CalculaMediaAmostral(estatisticaAtual.SomaAmostras, amostras);
-            estatisticaAtual.QuantidadeMedia = _geradorEstatisticas.CalculaMediaAmostral(estatisticaAtual.QuantidadeMedia,tempo - tempoInicialRodada);
+            estatisticaAtual.TempoMedio = estatisticaAtual.SomaAmostras/amostras;
+            estatisticaAtual.QuantidadeMedia = estatisticaAtual.QuantidadeMedia/(tempo - tempoInicialRodada);
             listaEstatisticas.Add(estatisticaAtual);
 
             //Console.WriteLine("Rodada " + Rodada);
@@ -205,10 +205,10 @@ namespace SimuladorAD
                 somaQuantidadeMedia += estatistica.QuantidadeMedia;
             }
 
-            tempoMedioFinal = _geradorEstatisticas.CalculaMediaAmostral(somaTempoMedio, listaEstatisticas.Count);
+            tempoMedioFinal = somaTempoMedio/listaEstatisticas.Count;
             varianciaTempoFinal = _geradorEstatisticas.CalculaVarianciaAmostral(listaEstatisticas.Select(l => l.TempoMedio).ToList(), tempoMedioFinal, listaEstatisticas.Count);
 
-            mediaPessoasFinal = _geradorEstatisticas.CalculaMediaAmostral(somaQuantidadeMedia,listaEstatisticas.Count);
+            mediaPessoasFinal = somaQuantidadeMedia/listaEstatisticas.Count;
             varianciaPessoasFinal = _geradorEstatisticas.CalculaVarianciaAmostral(listaEstatisticas.Select(l => l.QuantidadeMedia).ToList(), mediaPessoasFinal, listaEstatisticas.Count);
 
             icMedia = _geradorEstatisticas.CalculaIC(tempoMedioFinal, varianciaTempoFinal, VariavelAleatoria.TSTUDENT, listaEstatisticas.Count);
@@ -217,12 +217,8 @@ namespace SimuladorAD
             icPessoasMedia = _geradorEstatisticas.CalculaIC(mediaPessoasFinal, varianciaPessoasFinal, VariavelAleatoria.TSTUDENT, listaEstatisticas.Count);
             icPessoasVariancia = _geradorEstatisticas.CalculaIC(mediaPessoasFinal, varianciaPessoasFinal, VariavelAleatoria.CHIQUADRADO, listaEstatisticas.Count);
 
-            //shak altera
-
             double covTempo =_geradorEstatisticas.CalculaCovariancia(listaEstatisticas.Select(l => l.TempoMedio), tempoMedioFinal);
             double covPessoas = _geradorEstatisticas.CalculaCovariancia(listaEstatisticas.Select(l => l.QuantidadeMedia), mediaPessoasFinal);
-
-            //shak altera
 
             Console.WriteLine("--------------------------------------------------------------------");
             Console.WriteLine("Rodadas: " + listaEstatisticas.Count + " KMIN: " + Constantes.KMIN + " Utilizacao: " + TAXA_CHEGADA);

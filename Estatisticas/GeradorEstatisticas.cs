@@ -8,27 +8,29 @@ using System.Linq;
 
 namespace Estatisticas
 {
+
+    /* Classe responsável pelo cálculo matemático das estatisticas necessárias para a analise de desempenho da fila. 
+     * Todas os cálculos matemáticos são realizados através dessa classe.
+     */
     public class GeradorEstatisticas
     {
         private Random gerador;
-        private GeradorPlanilhas geradorPlanilhas;
 
+        //Construtor da classe.
         public GeradorEstatisticas()
         {
-            geradorPlanilhas = new GeradorPlanilhas();
             gerador = new Random();
         }
-
-        public void SalvaEstatisticas(List<Estatistica> estatisticas)
-        {
-            geradorPlanilhas.Exportar(estatisticas);
-        }
-
+        
+        //Método para o calculo da Precisao do intervalo de confiança.
         private void CalculaPrecisao(ref IntervaloConfianca ic)
         {
              ic.Precisao = (ic.U - ic.L)/(ic.U + ic.L);
         }
 
+        /* Método geral para o calculo do intervalo de confiança. 
+         * Responsável por escolher entre TStudent e ChiQuadrado através do parametro va, que informa qual o calculo requerido.
+         */
         public IntervaloConfianca CalculaIC(double media, double variancia, VariavelAleatoria va, int n)
         {
             var resultado = new IntervaloConfianca();
@@ -51,16 +53,17 @@ namespace Estatisticas
             return resultado;
         }
 
-
+        //Método que calcula o intervalo de confiança da variancia através da fórmula da ChiQuadrado.
         private void CalculaICChiQuadrado(double variancia, int n, ref IntervaloConfianca ic)
         {
             ChiSquared cs = new ChiSquared(n-1);
-            //ic.U = (Constantes.KMIN * (n - 1) * variancia) / cs.InverseCumulativeDistribution(0.025);
-            // ic.L = (Constantes.KMIN * (n - 1) * variancia) / cs.InverseCumulativeDistribution(0.975);
-            ic.U = ((n - 1) * variancia) / cs.InverseCumulativeDistribution(0.025);
-            ic.L = ((n - 1) * variancia) / cs.InverseCumulativeDistribution(0.975);
+            ic.U = (Constantes.KMIN * (n - 1) * variancia) / cs.InverseCumulativeDistribution(0.025);
+            ic.L = (Constantes.KMIN * (n - 1) * variancia) / cs.InverseCumulativeDistribution(0.975);
+            //ic.U = ((n - 1) * variancia) / cs.InverseCumulativeDistribution(0.025);
+            //ic.L = ((n - 1) * variancia) / cs.InverseCumulativeDistribution(0.975);
         }
 
+        //Método que calcula o intervalo de confiança da média através da fórmula da TStudent.
         private void CalculaICTStudent(double media, double variancia, int n, ref IntervaloConfianca ic)
         {
             StudentT ts = new StudentT(0,1,n-1);
@@ -70,27 +73,22 @@ namespace Estatisticas
             ic.L = media - percentil * Math.Sqrt(variancia/n);
         }
 
+        /*Método usado para se obter uma amostra aleatória de tempo através do cálculo da inversa da exponencial. 
+        *Usado para calcular a proxima chegada de fregueses e o tempo de atendimento no servidor. 
+        */
         public double CalculaExponencial(double taxa)
         {
             var amostra = GeraAmostra();
             return Math.Log(amostra)/(-taxa);
         }
 
+        //Gera uma amostra aleatória através do gerador de números aleatórios da classe Random do C#. Utiliza o tempo como semente.
         private double GeraAmostra()
         {
             return gerador.NextDouble();
         }
-
-        public void CalculaSomaAmostras(ref Estatistica estatistica, double x)
-        {
-            estatistica.SomaAmostras += x;
-        }
-
-        public double CalculaMediaAmostral(double somAmostras, double n)
-        {
-            return (somAmostras)/n;
-        }
-
+        
+        //Calcula a variancia iterando a partir de uma lista de médias de rodada e da média amostral geral. 
         public double CalculaVarianciaAmostral(List<double> listaMediaRodadas, double media, double n)
         {
             var soma = 0.0;
@@ -103,6 +101,7 @@ namespace Estatisticas
             return soma/(n-1);
         }
 
+        //Calcula a covariancia iterando a partir de uma lista de médias de rodada e da média amostral geral.
         public double CalculaCovariancia(IEnumerable<double> mediasRodadas, double mediaAmostral)
         {
             double autocov  = 0;

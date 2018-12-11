@@ -4,6 +4,7 @@ using System.Text;
 
 namespace Estruturas
 {
+    //Classe que herda o construtor e os métodos da classe Fila. Modificando os métodos de inserção e remoção de fregueses na fila para se comportar como FCFS.
     public class FilaFCFS : Fila
     {
 

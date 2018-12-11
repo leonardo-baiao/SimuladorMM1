@@ -4,6 +4,8 @@ using System.Text;
 
 namespace Estruturas
 {
+
+    //Classe abstrata responsável pelo armazenamento de dados na fila. É usada como base para as classes FilaFCFS e FilaLCFS. 
     public abstract class Fila
     {
         protected List<Fregues> fila;
@@ -19,6 +21,7 @@ namespace Estruturas
         public abstract Fregues RetornaFregues();
     }
 
+    //Enumerado responsável pela escolha do tipo de fila no inicio da simulação.
     public enum TipoFila
     {
         LCFS = 1,
