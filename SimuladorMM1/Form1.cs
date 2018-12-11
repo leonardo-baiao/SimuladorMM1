@@ -23,7 +23,7 @@ namespace SimuladorMM1
         private double utilizacao;
         private TipoFila fila;
         private List<Estatistica> estatisticas;
-        int index;
+        int rodadas;
         DateTime data_hora_comeco;
         DateTime data_hora_fim;
 
@@ -31,7 +31,7 @@ namespace SimuladorMM1
         {
             InitializeComponent();
 
-            index = 0;
+            rodadas = 0;
             estatisticas = new List<Estatistica>();
             fila = TipoFila.FCFS;
             utilizacao = 0.2;
@@ -60,7 +60,7 @@ namespace SimuladorMM1
             {
                 this.Invoke((MethodInvoker)delegate
                 {
-                    label2.Text = "Calculando rodada: " + (index + 1) + "  Tempo comeco: " + data_hora_comeco.ToLongTimeString();
+                    label2.Text = "Calculando rodada: " + rodadas + "  Tempo comeco: " + data_hora_comeco.ToLongTimeString();
                 });
                 _simulacao.IniciarSimulacao();
                 calculando = false;
@@ -68,7 +68,14 @@ namespace SimuladorMM1
 
             Task.Factory.StartNew(() =>
             {
-                while (calculando) ;
+                while (calculando)
+                {
+                    this.Invoke((MethodInvoker)delegate
+                    {
+                        label2.Text = "Calculando rodada: " + rodadas + "  Tempo comeco: " + data_hora_comeco.ToLongTimeString();
+                    });
+                    rodadas = _simulacao.listaEstatisticas.Count;
+                }
                 this.Invoke((MethodInvoker)delegate
                 {
                     List<double> list = new List<double>(_simulacao.listaEstatisticas.Select(l => l.QuantidadeMedia));
@@ -77,7 +84,8 @@ namespace SimuladorMM1
                 data_hora_fim = DateTime.Now;
                 this.Invoke((MethodInvoker)delegate
                 {
-                    label2.Text = "Rodada: " + (index + 1) + "  Tempo comeco: " + data_hora_comeco.ToLongTimeString() + "  Tempo final: " + data_hora_fim.ToLongTimeString();
+                    label2.Text = "Fim da simulação" + "  Tempo comeco: " + data_hora_comeco.ToLongTimeString() + "  Tempo final: " + data_hora_fim.ToLongTimeString() + "\n\n"
+                                + "Tempo Médio Final: ";
                 });
             });
 
