@@ -4,46 +4,21 @@ using System.Linq;
 
 namespace Estruturas
 {
+    //Classe responsável pela lógica da lista de eventos. Utiliza duas variaveis que são atualizadas com os novos eventos de chegada de fregues e saida do servidor.   
     public class ListaEventos
     {
-        private List<Evento> listaEventos;
         Evento proximaChegada;
         Evento proximaSaida;
 
+        //Construtor da classe.
         public ListaEventos()
         {
-            listaEventos = new List<Evento>();
             proximaChegada = new Evento();
             proximaSaida = new Evento();
         }
-
-        public Evento ProximoEvento()
-        {
-            try
-            {
-                var prox = listaEventos[0];
-                RemoveEvento();
-                return prox;
-            }
-            catch { return null; }
-        }
-
+        
+        //Adiciona o evento na variável responsável pelo tipo do evento.
         public void AdicionaEvento(Evento evento)
-        {
-            try
-            {
-                listaEventos.Insert(listaEventos.FindIndex(e => e.Tempo > evento.Tempo), evento);
-            }
-            catch (Exception) { listaEventos.Add(evento); }
-        }
-
-        public void RemoveEvento()
-        {
-            listaEventos.RemoveAt(0);
-        }
-
-
-        public void NewAdicionaEvento(Evento evento)
         {
             if (evento.Tipo == TipoEvento.CHEGADA_FREGUES)
             {
@@ -53,7 +28,8 @@ namespace Estruturas
                 proximaSaida = evento;
         }
 
-        public Evento NewProximoEvento()
+        //Retorna o evento com menor tempo.
+        public Evento ProximoEvento()
         {
             if (proximaChegada.Tempo <= proximaSaida.Tempo || proximaSaida.Tempo == 0)
                 return proximaChegada;
