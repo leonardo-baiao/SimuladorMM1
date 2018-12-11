@@ -23,7 +23,7 @@ namespace SimuladorMM1
         private double utilizacao;
         private TipoFila fila;
         private List<Estatistica> estatisticas;
-        int index, index2;
+        int index;
         DateTime data_hora_comeco;
         DateTime data_hora_fim;
 
@@ -39,7 +39,7 @@ namespace SimuladorMM1
 
         private void button1_Click(object sender, EventArgs e)
         {
-            
+            bool calculando;
             button1.Enabled = false;
             comboBox1.Enabled = false;
             radioButton1.Enabled = false;
@@ -54,71 +54,43 @@ namespace SimuladorMM1
 
             _simulacao = new Simulador(fila, utilizacao);
 
-
+            calculando = true;
+            data_hora_comeco = DateTime.Now;
             Task.Factory.StartNew(() =>
             {
+                this.Invoke((MethodInvoker)delegate
+                {
+                    label2.Text = "Calculando rodada: " + (index + 1) + "  Tempo comeco: " + data_hora_comeco.ToLongTimeString();
+                });
                 _simulacao.IniciarSimulacao();
+                calculando = false;
             });
 
             Task.Factory.StartNew(() =>
             {
-                Thread.Sleep(100);
-
-                data_hora_comeco = DateTime.Now;
-                while (index < 3200)
+                while (calculando) ;
+                this.Invoke((MethodInvoker)delegate
                 {
-                    if (index + 1 < _simulacao.listaEstatisticas.Count)
-                    {
-                        this.Invoke((MethodInvoker)delegate
-                        {
-                            chart1.Series["N° Pessoas"].Points.Add(_simulacao.listaEstatisticas[index].QuantidadeMedia);
-
-                        });
-
-                        index++;
-                    }
-                    Thread.Sleep(15);
-                }
-
-                //numeroPessoas.updateChart(updatePessoas, 20);
-            });
-
-            Task.Factory.StartNew(() =>
-            {
-                Thread.Sleep(100);
-                while (index2 < 3200)
-                {
-                    if (index2 + 1 < _simulacao.listaEstatisticas.Count)
-                    {
-                        this.Invoke((MethodInvoker)delegate
-                        {
-                            chart2.Series["Tempo Médio"].Points.Add(_simulacao.listaEstatisticas[index2].TempoMedio);
-                        
-                        });
-                    
-                        index2++;
-                    }
-                    Thread.Sleep(15);
-                }
-                //tempoMedio.updateChart(updateTempo, 20);
-            });
-
-            Task.Factory.StartNew(() =>
-            {
-                do
-                {
-                    this.Invoke((MethodInvoker)delegate
-                    {
-                        label2.Text = "Rodada: " + (index + 1) + "  Tempo comeco: " + data_hora_comeco.ToLongTimeString();
-                    });
-                    Thread.Sleep(15);
-                } while (index < 3199);
+                    List<double> list = new List<double>(_simulacao.listaEstatisticas.Select(l => l.QuantidadeMedia));
+                    chart1.Series["N° Pessoas"].Points.DataBindY(list);
+                });
                 data_hora_fim = DateTime.Now;
                 this.Invoke((MethodInvoker)delegate
                 {
-                    label2.Text = "Rodada: " + (index + 1) + "  Tempo comeco: " + data_hora_comeco.ToLongTimeString() + "  Tempo fim: " + data_hora_fim.ToLongTimeString();
+                    label2.Text = "Rodada: " + (index + 1) + "  Tempo comeco: " + data_hora_comeco.ToLongTimeString() + "  Tempo final: " + data_hora_fim.ToLongTimeString();
                 });
             });
+
+            Task.Factory.StartNew(() =>
+            {
+                while (calculando) ;
+                this.Invoke((MethodInvoker)delegate
+                {
+                    List<double> list = new List<double>(_simulacao.listaEstatisticas.Select(l => l.TempoMedio));
+                    chart2.Series["Tempo Médio"].Points.DataBindY(list);
+                });
+            });           
+
 
         }
 
@@ -143,15 +115,6 @@ namespace SimuladorMM1
             fila = TipoFila.LCFS;
         }
 
-        private double updatePessoas()
-        {
-
-            if(index + 1 < _simulacao.listaEstatisticas.Count)
-            {
-                index++;
-            }
-            return _simulacao.listaEstatisticas[index].QuantidadeMedia;
-        }
 
         private void label2_Click(object sender, EventArgs e)
         {
@@ -163,13 +126,5 @@ namespace SimuladorMM1
 
         }
 
-        private double updateTempo()
-        {
-            if(index2 + 1 < _simulacao.listaEstatisticas.Count)
-            {
-                index2++;
-            }
-            return _simulacao.listaEstatisticas[index2].TempoMedio;
-        }
     }
 }
