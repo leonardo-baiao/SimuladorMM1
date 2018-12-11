@@ -212,8 +212,8 @@ namespace SimuladorAD
             SomPessoasAtual += estatisticaAtual.QuantidadeMedia;
             SomQPessoasAtual += Math.Pow(estatisticaAtual.QuantidadeMedia, 2);
 
-            listaVarianciaP.Add(_geradorEstatisticas.CalculaEstimativaVariancia(SomQPessoasAtual, SomPessoasAtual, amostras));
-            listaVarianciaT.Add(_geradorEstatisticas.CalculaEstimativaVariancia(SomQTempoAtual, SomTempoAtual, amostras));
+            listaVarianciaP.Add(_geradorEstatisticas.CalculaEstimativaVariancia(SomQPessoasAtual, SomPessoasAtual, Rodada));
+            listaVarianciaT.Add(_geradorEstatisticas.CalculaEstimativaVariancia(SomQTempoAtual, SomTempoAtual, Rodada));
         }
 
         public void CalculaEstatisticasFinais()
