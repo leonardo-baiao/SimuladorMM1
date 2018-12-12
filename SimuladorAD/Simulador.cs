@@ -8,6 +8,7 @@ namespace SimuladorAD
 {
     public class Simulador
     {
+        // variaveis principais
         private double tempo = 0;
         private double tempoUltimoEvento = 0;
         private double tempoInicialRodada = 0;
@@ -31,7 +32,6 @@ namespace SimuladorAD
         double SomQTempoAtual = 0;
         double SomPessoasAtual = 0;
         double SomQPessoasAtual = 0;
-        // fim variaveis
 
 
         // variaveis para parametros finais
@@ -47,8 +47,9 @@ namespace SimuladorAD
         public IntervaloConfianca icVariancia;
         public IntervaloConfianca icPessoasMedia;
         public IntervaloConfianca icPessoasVariancia;
-        // fim variaveis
 
+
+        //Construtor da classe
         public Simulador(TipoFila tipoFila, double taxaChegada)
         {
             GeraFila(tipoFila);
@@ -65,6 +66,9 @@ namespace SimuladorAD
             listaMediaPessoasRodada = new List<double>();
         }
 
+        /* Método principal da simulação. Chamada as rotinas de processamento de rodada transiente, processamento de eventos, calculo de estatisticas e incremento de rodadas. 
+         * No final de todas as rodadas, chama a rotina de calculo de estatisticas finais.
+         */
         public void IniciarSimulacao()
         {
 
@@ -82,14 +86,15 @@ namespace SimuladorAD
         }
 
         public int Rodada { get; private set; }
-
+        
+        //Responsável pelo processamento da rodada transiente. Utiliza um KMIN especifico para a rodada transiente.
         internal void ProcessaRodadaTransiente()
         {
             ProcessaEventos(Constantes.KTRANS);
             ProximaRodada();
         }
 
-
+        //Método para inicialização de nova rodada. incrementa a variável de rodada e zera as variáveis de controle.
         public void ProximaRodada()
         {
             Rodada++;
@@ -102,6 +107,7 @@ namespace SimuladorAD
             tempoInicialRodada = tempo;
         }
         
+        //Método que itera o tratamento dos eventos enquanto não atingir o número de amostras definido.
         public void ProcessaEventos(int K)
         {
             while(amostras < K)
@@ -110,6 +116,7 @@ namespace SimuladorAD
             }
         }
 
+        //Método para o tratamento de eventos. Recebe os novos eventos e gerencia o tipo de tratamento respectivo.
         private void TrataEvento()
         {
             eventoAtual = listaEventos.ProximoEvento();
@@ -135,7 +142,10 @@ namespace SimuladorAD
         }
 
 
-
+        /* Método para o tratamento da chegada de fregueses. 
+         * Salva a quantidade média de pessoas na fila e insere um novo fregues na fila. 
+         * Calcula o proximo evento de chegada.
+         */
         private void ChegadaFregues()
         {
             estatisticaAtual.QuantidadeMedia += servidor ? (fila.Quantidade + 1) * (tempo - tempoUltimoEvento) : fila.Quantidade * (tempo - tempoUltimoEvento);
@@ -152,6 +162,7 @@ namespace SimuladorAD
 
         }
 
+        //Método para o tratamento da entrada de fregueses no servidor. Retira o fregues da fila e calcula o proximo evento de saida do servidor.
         private void EntradaServidor()
         {
             var cliente = fila.RetornaFregues();
@@ -164,6 +175,10 @@ namespace SimuladorAD
             }
         }
 
+        /* Método para o tratamento da saida de fregueses do servidor. 
+         * Salva a quantidade média de pessoas na fila e insere um novo fregues na fila.
+         * Inicia uma nova entrada no servidor, caso haja pessoas na fila de espera.
+         */
         private void SaidaServidor()
         {
             estatisticaAtual.QuantidadeMedia += (fila.Quantidade + 1) * (tempo - tempoUltimoEvento);
@@ -177,7 +192,7 @@ namespace SimuladorAD
             EntradaServidor();
         }
 
-
+        //Método para o calculo do tempo de atendimento no servidor. Calcula uma amostragem exponencial e salva no evento.
         private Evento CalculaSaidaServidor()
         {
             return new Evento
@@ -187,6 +202,7 @@ namespace SimuladorAD
             };
         }
 
+        //Método para o calculo da chegada de fregueses a fila. Calcula uma amostragem exponencial e salva no evento.
         private Evento CalculaChegadaFregues()
         {
             return new Evento
@@ -196,6 +212,9 @@ namespace SimuladorAD
             };
         }
         
+        /* Método que calcula as estatisticas de cada Rodada.
+         * Calcula a média e a variancia amostral do Tempo de espera na fila e da quantidade de pessoas na fila.
+         */
         public void CalculaEstatisticas()
         {
             estatisticaAtual.TempoMedio = estatisticaAtual.SomaAmostras/amostras;
@@ -214,6 +233,11 @@ namespace SimuladorAD
             listaVarianciaT.Add(_geradorEstatisticas.CalculaEstimativaVariancia(SomQTempoAtual, SomTempoAtual, Rodada));
         }
 
+
+        /* Método que calcula as estatisticas finais.
+         * Calcula a media e a variancia final do tempo de espera na fila e da quantidade de fregueses na fila.
+         * Calcula os ICs da média e da variancia e suas respectivas precisoes;
+         */
         public void CalculaEstatisticasFinais()
         {            
             foreach (var estatistica in listaEstatisticas)
@@ -238,7 +262,8 @@ namespace SimuladorAD
             double covPessoas = _geradorEstatisticas.CalculaCovariancia(listaEstatisticas.Select(l => l.QuantidadeMedia), mediaPessoasFinal);
 
         }
-
+        
+        //Instancia uma nova fila, de acordo com o tipo de fila requisitado.
         private void GeraFila(TipoFila tipoFila)
         {
             if (tipoFila.Equals(TipoFila.FCFS))
