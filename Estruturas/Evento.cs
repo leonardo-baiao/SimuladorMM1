@@ -16,6 +16,5 @@ namespace Estruturas
     {
         CHEGADA_FREGUES = 1,
         SAIDA_SERVIDOR = 2,
-        ENTRADA_SERVIDOR = 3,
     }
 }

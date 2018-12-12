@@ -45,12 +45,9 @@ namespace SimuladorMM1
             radioButton1.Enabled = false;
             radioButton2.Enabled = false;
 
-            kayChart numeroPessoas = new kayChart(chart1, 600);
+            kayChart medias = new kayChart(chart1, 600);
 
-            kayChart tempoMedio = new kayChart(chart2, 600);
-
-            numeroPessoas.serieName = "N° Pessoas";
-            tempoMedio.serieName = "Tempo Médio";
+            medias.serieName = "N° Pessoas";
 
             _simulacao = new Simulador(fila, utilizacao);
 
@@ -78,13 +75,22 @@ namespace SimuladorMM1
                 }
                 this.Invoke((MethodInvoker)delegate
                 {
-                    List<double> list = new List<double>(_simulacao.listaEstatisticas.Select(l => l.QuantidadeMedia));
-                    chart1.Series["N° Pessoas"].Points.DataBindY(list);
-                    chart1.Series["Variância"].Points.DataBindY(_simulacao.listaVarianciaP);
+                    //double tempoMax = _simulacao.listaMediaTempoRodada.Max();
+                    //double pessoasMax = _simulacao.listaMediaPessoasRodada.Max();
 
-                    List<double> list1 = new List<double>(_simulacao.listaEstatisticas.Select(l => l.TempoMedio));
-                    chart2.Series["Tempo Médio"].Points.DataBindY(list1);
-                    chart2.Series["Variância"].Points.DataBindY(_simulacao.listaVarianciaT);
+                    //double tempoMin = _simulacao.listaMediaTempoRodada.Min();
+                    //double pessoasMin = _simulacao.listaMediaPessoasRodada.Min();
+
+                    //chart1.ChartAreas[0].AxisY.Maximum = tempoMax > pessoasMax ? tempoMax : pessoasMax;
+                    //chart1.ChartAreas[0].AxisY.Minimum = tempoMin > pessoasMin ? pessoasMin : tempoMin;
+
+                    chart1.Series["N° Pessoas"].Points.DataBindY(_simulacao.listaMediaPessoasRodada);
+
+                    chart3.Series["Variância de Pessoas"].Points.DataBindY(_simulacao.listaVarianciaP);
+
+                    chart1.Series["Tempo Médio"].Points.DataBindY(_simulacao.listaMediaTempoRodada);
+
+                    chart3.Series["Variância do Tempo"].Points.DataBindY(_simulacao.listaVarianciaT);
                 });
                 data_hora_fim = DateTime.Now;
                 this.Invoke((MethodInvoker)delegate

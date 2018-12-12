@@ -25,6 +25,8 @@ namespace SimuladorAD
         // variaveis para estimativa da variancia por rodada
         public List<double> listaVarianciaP;
         public List<double> listaVarianciaT;
+        public List<double> listaMediaTempoRodada;
+        public List<double> listaMediaPessoasRodada;
         double SomTempoAtual = 0;
         double SomQTempoAtual = 0;
         double SomPessoasAtual = 0;
@@ -59,6 +61,8 @@ namespace SimuladorAD
             
             listaVarianciaP = new List<double>();
             listaVarianciaT = new List<double>();
+            listaMediaTempoRodada = new List<double>();
+            listaMediaPessoasRodada = new List<double>();
         }
 
         public void IniciarSimulacao()
@@ -173,15 +177,6 @@ namespace SimuladorAD
             EntradaServidor();
         }
 
-        private Evento CalculaEntradaServidor()
-        {
-            return new Evento
-            {
-                Tipo = TipoEvento.ENTRADA_SERVIDOR,
-                Tempo = tempo
-            };
-        }
-
 
         private Evento CalculaSaidaServidor()
         {
@@ -211,6 +206,9 @@ namespace SimuladorAD
             SomQTempoAtual += Math.Pow(estatisticaAtual.TempoMedio, 2);
             SomPessoasAtual += estatisticaAtual.QuantidadeMedia;
             SomQPessoasAtual += Math.Pow(estatisticaAtual.QuantidadeMedia, 2);
+
+            listaMediaTempoRodada.Add(SomTempoAtual / Rodada);
+            listaMediaPessoasRodada.Add(SomPessoasAtual / Rodada);
 
             listaVarianciaP.Add(_geradorEstatisticas.CalculaEstimativaVariancia(SomQPessoasAtual, SomPessoasAtual, Rodada));
             listaVarianciaT.Add(_geradorEstatisticas.CalculaEstimativaVariancia(SomQTempoAtual, SomTempoAtual, Rodada));

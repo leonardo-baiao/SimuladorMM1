@@ -19,7 +19,7 @@ namespace Estatisticas
         //Construtor da classe.
         public GeradorEstatisticas()
         {
-            gerador = new Random();
+            gerador = new Random(DateTime.Now.Millisecond);
         }
         
         //Método para o calculo da Precisao do intervalo de confiança.
@@ -57,10 +57,8 @@ namespace Estatisticas
         private void CalculaICChiQuadrado(double variancia, int n, ref IntervaloConfianca ic)
         {
             ChiSquared cs = new ChiSquared(n-1);
-            ic.U = (Constantes.KMIN * (n - 1) * variancia) / cs.InverseCumulativeDistribution(0.025);
-            ic.L = (Constantes.KMIN * (n - 1) * variancia) / cs.InverseCumulativeDistribution(0.975);
-            //ic.U = ((n - 1) * variancia) / cs.InverseCumulativeDistribution(0.025);
-            //ic.L = ((n - 1) * variancia) / cs.InverseCumulativeDistribution(0.975);
+            ic.U = ((n - 1) * variancia) / cs.InverseCumulativeDistribution(0.025);
+            ic.L = ((n - 1) * variancia) / cs.InverseCumulativeDistribution(0.975);
         }
 
         //Método que calcula o intervalo de confiança da média através da fórmula da TStudent.
