@@ -72,7 +72,7 @@ namespace SimuladorAD
 
             while (Rodada <= Constantes.MAX_RODADAS)
             {
-                ProcessaEventos();
+                ProcessaEventos(Constantes.KMIN);
 
                 CalculaEstatisticas();
 
@@ -85,7 +85,7 @@ namespace SimuladorAD
 
         internal void ProcessaRodadaTransiente()
         {
-            ProcessaEventos();
+            ProcessaEventos(Constantes.KTRANS);
             ProximaRodada();
         }
 
@@ -102,9 +102,9 @@ namespace SimuladorAD
             tempoInicialRodada = tempo;
         }
         
-        public void ProcessaEventos()
+        public void ProcessaEventos(int K)
         {
-            while(amostras < Constantes.KMIN)
+            while(amostras < K)
             {
                 TrataEvento();
             }
