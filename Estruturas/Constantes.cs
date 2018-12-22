@@ -10,7 +10,7 @@ namespace Estruturas
     {
         public static double TAXA_SERVIDOR = 1;
         public static int MAX_RODADAS = 3200;
-        public static int KMIN = 400;
+        public static int KMIN = 3200;
         public static int KTRANS = 300000;
     }
 }

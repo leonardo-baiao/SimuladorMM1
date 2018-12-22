@@ -18,53 +18,54 @@ namespace SimuladorMM1
 {
     public partial class Form1 : Form
     {
-        private Simulador _simulacao;
-
+        //variaveis expostas na tela
+        private Simulador _simulacao; // instancia do simulador
         private double utilizacao;
         private TipoFila fila;
         private List<Estatistica> estatisticas;
-        int rodadas;
+        int rodadas; // rodada atual
         DateTime data_hora_comeco;
         DateTime data_hora_fim;
 
         public Form1()
         {
             InitializeComponent();
-
             rodadas = 0;
             estatisticas = new List<Estatistica>();
             fila = TipoFila.FCFS;
             utilizacao = 0.2;
         }
 
+        // tratando o evento de clique no botao
         private void button1_Click(object sender, EventArgs e)
         {
-            bool calculando;
+            bool calculando; //variavel que tem valor true se estamos calculando os dados da simulacao
+
+            //botoes da tela nao podem mais ser clicaveis
             button1.Enabled = false;
             comboBox1.Enabled = false;
             radioButton1.Enabled = false;
             radioButton2.Enabled = false;
-
-            kayChart medias = new kayChart(chart1, 600);
-
-            medias.serieName = "N° Pessoas";
-
-            _simulacao = new Simulador(fila, utilizacao);
-
+    
+            _simulacao = new Simulador(fila, utilizacao); // passando argumentos para o construtor do simulador
             calculando = true;
             data_hora_comeco = DateTime.Now;
+            //abrindo uma thread para comeco da simulacao
             Task.Factory.StartNew(() =>
             {
                 this.Invoke((MethodInvoker)delegate
                 {
                     label2.Text = "Calculando rodada: " + rodadas + "  Tempo comeco: " + data_hora_comeco.ToLongTimeString();
                 });
+                //iniciando a simulacao
                 _simulacao.IniciarSimulacao();
                 calculando = false;
             });
 
+            //abrindo uma thread para interface e escrita na tela
             Task.Factory.StartNew(() =>
             {
+                //avisando qual rodada esta sendo calculada enquanto estamos calculando as estatisticas
                 while (calculando)
                 {
                     this.Invoke((MethodInvoker)delegate
@@ -73,17 +74,11 @@ namespace SimuladorMM1
                     });
                     rodadas = _simulacao.listaEstatisticas.Count;
                 }
+
+                //colocando os dados recolhidos por rodada nos graficos
+                //observe que as medias sao as medias estimadas em cada rodada e nao a media da rodada
                 this.Invoke((MethodInvoker)delegate
                 {
-                    //double tempoMax = _simulacao.listaMediaTempoRodada.Max();
-                    //double pessoasMax = _simulacao.listaMediaPessoasRodada.Max();
-
-                    //double tempoMin = _simulacao.listaMediaTempoRodada.Min();
-                    //double pessoasMin = _simulacao.listaMediaPessoasRodada.Min();
-
-                    //chart1.ChartAreas[0].AxisY.Maximum = tempoMax > pessoasMax ? tempoMax : pessoasMax;
-                    //chart1.ChartAreas[0].AxisY.Minimum = tempoMin > pessoasMin ? pessoasMin : tempoMin;
-
                     chart1.Series["N° Pessoas"].Points.DataBindY(_simulacao.listaMediaPessoasRodada);
 
                     chart3.Series["Variância de Pessoas"].Points.DataBindY(_simulacao.listaVarianciaP);
@@ -93,6 +88,8 @@ namespace SimuladorMM1
                     chart3.Series["Variância do Tempo"].Points.DataBindY(_simulacao.listaVarianciaT);
                 });
                 data_hora_fim = DateTime.Now;
+
+                //escrevendo dados finais na tela
                 this.Invoke((MethodInvoker)delegate
                 {
                     label2.Text = "Fim da simulação" + "  Tempo de começo: " + data_hora_comeco.ToLongTimeString() + "  Tempo final: " + data_hora_fim.ToLongTimeString();
@@ -108,21 +105,29 @@ namespace SimuladorMM1
             });          
         }
         
+        //evento de selecao da utilizacao
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
             ComboBox comboBox = (ComboBox)sender;
             utilizacao = double.Parse(comboBox.SelectedItem.ToString());
         }
 
+        //evento da escolha de tipo de fila LCFS
         private void radioButton1_CheckedChanged(object sender, EventArgs e)
         {
             fila = TipoFila.FCFS;
         }
 
+        //evento de escolha de tipo de fila LCFS
         private void radioButton2_CheckedChanged(object sender, EventArgs e)
         {
             fila = TipoFila.LCFS;
         }
+
+
+        /*
+            METODOS DE EVENTO CLICK GERADOS PELA FRAMEWORK 
+         */
 
         private void label1_Click(object sender, EventArgs e)
         {
